@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Bezier Curve Test</title>
+    <style>
+        #canvasEnv {
+            border: 1px;
+            border-style: solid;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvasEnv" width=512 height=512></canvas>
+
+    <p>
+        tension <input id="rangeTension" type="range" value=0 min=0 max=1 step=0.01 oninput="onInputRangeTension(this.value, this)">
+    </p>
+
+    <script>
+        var canvas = document.getElementById("canvasEnv");
+        var width = canvas.width;
+        var height = canvas.height;
+        var context = canvas.getContext("2d");
+        context.imageSmoothingEnabled = false;
+
+        // init
+        var rangeTension = document.getElementById("rangeTension");
+        var tension = parseFloat(rangeTension.value);
+
+        var pad = 64;
+        var p1 = [pad, pad];
+        var pp = [pad, height - pad];
+        var p3 = [width - pad, height - pad];
+
+        var points = [p1, pp, pp, pp, pp, pp, p3];
+        console.log(points);
+
+        updateCanvas();
+
+        function updateCanvas() {
+            context.clearRect(0, 0, width, height);
+
+            // デバッグ用 canvas実装、普段はこれでいい
+            //context.strokeStyle = "#ffaa33";
+            //drawBezier2();
+
+            // n次のベジエ曲線が描ける
+            context.strokeStyle = "#33aaff";
+            context.fillStyle = "#aaaaaa";
+            context.lineWidth = 3;
+            drawBezier();
+        }
+
+        function drawBezier2() {
+            context.beginPath();
+            context.moveTo(p1[0], p1[1]);
+            context.bezierCurveTo(pp[0], pp[1], pp[0], pp[1], p3[0], p3[1]);
+            context.stroke();
+        }
+
+        function drawBezier() {
+            var size = 2;
+
+            context.beginPath();
+            context.moveTo(points[0][0], points[0][1]);
+            for (var t = 0; t < 1; t += 0.01) {
+                var p = bezierCurve(t);
+                context.lineTo(p[0], p[1]);
+                //context.fillRect(p[0] - size / 2, p[1] - size / 2, size, size)
+            }
+            context.stroke();
+        }
+
+        function bezierCurve(t) {
+            var sum = [0, 0];
+            for (var i = 0; i < points.length; ++i) {
+                var a = basis(points.length - 1, i, t);
+                sum[0] += points[i][0] * a;
+                sum[1] += points[i][1] * a;
+            }
+            return sum;
+        }
+
+        function basis(n, i, t) {
+            return binomialCoefficient(n, i) * Math.pow(t, i) * Math.pow(1 - t, n - i);
+        }
+
+        function bi(n, k) {
+            // http://tsujimotter.hatenablog.com/entry/ruby-binomial-coefficient
+            if (k == 0) {
+                return 1;
+            }
+            else {
+                return bi(n - 1, k - 1) * n / k;
+            }
+        }
+
+        function binomialCoefficient(n, k) {
+            // http://qiita.com/jkr_2255/items/3c9bc8273da818a39810
+            var r = 1;
+            for (var i = 1; i <= k; ++i) {
+                r *= n--;
+                r /= i;
+            }
+            return r;
+        }
+
+        function onInputRangeTension(value, elem) {
+            tension = parseFloat(value);
+
+            pp = [
+                interp(pad, width - pad, tension),
+                interp(height - pad, pad, tension)
+            ];
+
+            for (var i = 1; i < points.length - 1; ++i) {
+                points[i] = pp;
+            }
+
+            updateCanvas();
+        }
+
+        function interp(a, b, r) {
+            return (1 - r) * a + r * b;
+        }
+    </script>
+</body>
+</html>

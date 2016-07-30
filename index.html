@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <title>WebAudio004 Envelope</title>
+</head>
+
+<body>
+    <h1>Envelope</h1>
+
+    <p>Playボタンで演奏が始まります。</p>
+    <p>Killボタンで音が止まります。</p>
+
+    <p>
+        <input id="buttonPlay" type="button" value="Play" onmousedown="onMouseDownButtonPlay()" onmouseup="onMouseUpButtonPlay()">
+        <input id="buttonKill" type="button" value="Kill" onmousedown="onMouseDownButtonKill()">
+        <ul>
+            <li>
+                Gain <input id="rangeGain" type="range" value=1 min=0 max=1 step=0.01 oninput="onInputRangeGain(this.value, this)">
+            </li>
+        </ul>
+    </p>
+
+    <hr>
+
+    <p>以下は試しに作った曲線です。</p>
+
+    <ul>
+        <li>
+            <a href="./Curve000 fractal.html">フラクタル曲線</a>
+        </li>
+        <li>
+            <a href="./Curve001 B-Spline.html">B-Spline曲線</a>
+        </li>
+        <li>
+            <a href="./Curve002 Bezier.html">Canvasのベジエ曲線</a>
+        </li>
+    </ul>
+
+    <script src="util.js"></script>
+    <script src="curve.js"></script>
+    <script src="synth.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

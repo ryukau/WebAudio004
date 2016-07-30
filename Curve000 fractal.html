@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Envelope Test</title>
+    <style>
+        #canvasEnv {
+            border: 1px;
+            border-style: solid;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvasEnv" width=512 height=512></canvas>
+
+    <p>
+        tension <input id="rangeTension" type="range" value=2 min=0 max=7 step=0.01 oninput="onInputRangeTension(this.value, this)">
+        lean <input id="rangeLean" type="range" value=0.5 min=0 max=1 step=0.01 oninput="onInputRangeLean(this.value, this)">
+    </p>
+
+    <script>
+        const DEPTH = 7;
+        const RESOLUTION = Math.pow(2, DEPTH);
+
+        var canvas = document.getElementById("canvasEnv");
+        var width = canvas.width;
+        var height = canvas.height;
+        var context = canvas.getContext("2d");
+        context.imageSmoothingEnabled = false;
+
+        var tension = document.getElementById("rangeTension").value;
+        var lean = document.getElementById("rangeLean").value;
+        var curve = new Array(RESOLUTION);
+
+        setCurve();
+
+        function updateCanvas() {
+            context.clearRect(0, 0, width, height);
+            context.fillStyle = "#000000";
+            var step = width / RESOLUTION;
+            for (var i = 0; i < RESOLUTION; ++i) {
+                let cStep = curve[i] * step;
+                context.fillRect(i * step, height - cStep, step, 1);
+                context.fillRect(i * step, height - cStep, 1, cStep);
+            }
+        }
+
+        function setCurve() {
+            curve[0] = 0;
+            curve[RESOLUTION - 1] = RESOLUTION;
+            recCurve(0, RESOLUTION - 1);
+            updateCanvas();
+        }
+
+        function recCurve(low, high) {
+            if ((high - low) <= 1) {
+                return;
+            }
+            else {
+                let mid;
+                if (lean <= 0) {
+                    mid = low + 1;
+                }
+                else if (1 <= lean) {
+                    mid = high - 1;
+                }
+                else {
+                    mid = low + (high - low) * lean;
+                    if (lean < 0.5) {
+                        mid = Math.ceil(mid);
+                    }
+                    else {
+                        mid = Math.floor(mid);
+                    }
+                }
+                curve[mid] = curve[low] + ((curve[high] - curve[low]) / tension);
+                recCurve(low, mid);
+                recCurve(mid, high);
+            }
+        }
+
+        function onInputRangeTension(value, elem) {
+            tension = parseFloat(Math.pow(2, value));
+            setCurve();
+        }
+
+        function onInputRangeLean(value, elem) {
+            lean = parseFloat(value);
+            setCurve();
+        }
+    </script>
+</body>
+</html>
